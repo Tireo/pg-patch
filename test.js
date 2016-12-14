@@ -2,7 +2,7 @@ var pg = require('pg');
 var pgPatcher = require("./lib/pg-patch.js");
 
 var client = new pg.Client({
-    user: 'rage',
+    user: 'test',
     database: 'test',
     password: 'test',
     host: 'localhost',
@@ -10,6 +10,5 @@ var client = new pg.Client({
 });
 
 new pgPatcher(client, {
-    /*dbSchema: 'test',
-    dbTable: 'aaa'*/
+    //targetVersion: 11
 });
