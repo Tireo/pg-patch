@@ -10,5 +10,6 @@ var client = new pg.Client({
 });
 
 new pgPatcher(client, {
+    logLevel: 'DEBUG'
     //targetVersion: 11
 });
