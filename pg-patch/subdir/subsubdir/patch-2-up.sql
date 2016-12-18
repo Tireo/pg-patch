@@ -1,0 +1,1 @@
+--insert into aaaa VALUES (1, 2);

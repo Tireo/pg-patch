@@ -1,4 +1,2 @@
 
-var pgPatcher = require("./lib/pg-patch.js");
-
-module.exports = {};
+module.exports = require("./lib/pg-patch");

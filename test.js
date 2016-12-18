@@ -1,7 +1,9 @@
-var pg = require('pg');
-var pgPatcher = require("./lib/pg-patch.js");
+'use strict';
 
-var client = new pg.Client({
+let pg = require('pg');
+let pgPatcher = require("./lib/pg-patch.js");
+
+let client = new pg.Client({
     user: 'test',
     database: 'test',
     password: 'test',
@@ -9,8 +11,34 @@ var client = new pg.Client({
     port: 5432
 });
 
-new pgPatcher(client, {
-    logLevel: 'DEBUG',
-    //targetVersion: 0
-    //targetVersion: 11
+/**/
+
+let ownClient = {
+    user: 'test',
+    database: 'test',
+    password: 'test',
+    host: 'localhost',
+    port: 5432
+};
+
+let patcher = pgPatcher.create({
+    //transactionControlMode: 'SINGLE',
+    dryRun: 'LOG_ONLY',
+    client: ownClient  /*,
+    logLevel: 'DEBUG'*/
 });
+
+patcher.run();
+
+/*pgPatcher
+    .create({
+        client: ownClient,
+        logLevel: 'DEBUG'
+    })
+    .run()
+    .then(function () {
+        pgPatcher.run({
+            targetVersion: 0
+        });
+        //client.end();
+    });*/
