@@ -22,14 +22,11 @@ let ownClient = {
 };
 
 let patcher = pgPatcher.create({
-    //transactionControlMode: 'SINGLE',
-    targetVersion: 3,
-    dryRun: 'TEST_SQL',
-    client: ownClient  /*,
-    logLevel: 'DEBUG'*/
-});
+    client: ownClient,
+    targetVersion: 10
+}).run();
 
-patcher.stepDown();
+//patcher.stepDown();
 
 /*pgPatcher
     .create({

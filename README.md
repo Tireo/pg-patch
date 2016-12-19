@@ -20,28 +20,149 @@ PostgreSQL DB pathing made easy.
 * Configurable log level
 * Promise interface
 
-### planned in near future:
+### planned:
 
 * Migration history
 * Report generation support
+* Command line support
+* Configuration file support
 
 ## Preparation
 
-* Create patch files firectory: **"pg-patch"**
-
-    ...or 
-
+TODO
 
 ## Basic usage
 
-If you're using 
+#### Smallest working example
 
-For the most common scenario all You need is:
+Easiest way to use pg-patch is:
+
 ```node
-let pgPatcher = require("./lib/pg-patch.js");
-
-(new pgPatcher()).run()
+require("pg-patch").run();
 ```
+
+Above code would use default configuration settings (see: **Configuration** section)
+and load DB connection settings from ENV variables. (see **node-postgres** npm package)
+
+It is also possible to create patcher instance and run it separately:
+
+```node
+let patcher = require("pg-patch").create();
+
+//do something
+
+patcher.run();
+```
+
+Both above examples have the same result.
+
+#### Supplying run-time configuration
+
+You can both supply configuration for given run:
+
+```node
+require("pg-patch").run(configObject);
+```
+
+As well as setting master configuration for pg-patch instance
+
+```node
+let patcher = require("pg-patch").create(configObject);
+```
+
+##### Master configuration vs run configuration
+
+If you specify both master and run configurations the run configuration properties have priority over master configuration ones:
+
+```node
+let patcher = require("pg-patch").create({
+    a: 1,
+    b: 2
+});
+
+patcher.run({
+    a: 3
+});
+```
+
+above code is equal to:
+
+```node
+let patcher = require("pg-patch").create();
+
+patcher.run({
+    a: 3,
+    b: 2
+});
+```
+
+#### Connecting to the PostgreSQL
+
+There are currently 3 ways in which pg-patch will try to connect to PostgreSQL.
+
+1. Create **pg.Client** based on ENV variables **(default)**
+
+    This happens when no **client** is set in the configuration:
+
+    ```node
+    //the same for .run()
+    require("pg-patch").create({
+        //contains no client property
+    });
+    ```
+
+2. Create **pg.Client** based on passed clientConfig
+
+    ```node
+    //the same for .run()
+    require("pg-patch").create({
+        client: clientConfig
+    });
+    ```
+
+    Client configuration object work exactly as in **[node-postgres](http://github.com/brianc/node-postgres)** npm package.
+
+    ```node
+    //configObject example
+    let clientConfig = {
+        user: 'foo', //env var: PGUSER
+        database: 'my_db', //env var: PGDATABASE
+        password: 'secret', //env var: PGPASSWORD
+        host: 'localhost', // Server hosting the postgres database
+        port: 5432, //env var: PGPORT
+        max: 10, // max number of clients in the pool
+        idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
+    };
+    ```
+
+    For more about **pg.Client** configuration check **node-postgres** npm package.
+
+3. Use passed **pg.Client** instance
+
+    ```node
+    let pg = require('pg');
+    let pgClientInstance = new pg.Client({
+        //configuration
+    });
+
+    //the same for .run()
+    require("pg-patch").create({
+        client: pgClientInstance
+    });
+    ```
+
+    **IMPORTANT:** passed **pg.Client** instances are not closed automatically by **pg-patch**.
+
+    If You need to close them you can do this by using supplied done method.
+
+    ```node
+    require("pg-patch").run({
+        client: pgClientInstance
+    }).then(function(done){
+        //example assumes success
+        done(); //pgClientInstance closed
+    });
+    ```
 
 ## Configuration
 
@@ -56,7 +177,7 @@ let pgPatcher = require("./lib/pg-patch.js");
 * **actionUpdate**
 * **patchFileTemplate**
 
-## Miscelanous
+## Miscellaneous
 
 To generate current complexity report simply use plato:
 
