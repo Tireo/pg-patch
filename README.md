@@ -1,6 +1,6 @@
 # pg-patch
 
-PostgreSQL DB pathing made easy.
+PostgreSQL DB patching made easy.
 
 ## Features
 
@@ -29,7 +29,29 @@ PostgreSQL DB pathing made easy.
 
 ## Preparation
 
-TODO
+### Patch files
+All patch files need to:
+
+1. Be inside patch directory: **'pg-patch'** (or in any subdirectory)
+2. Follow naming convention: **'[$TIMESTAMP-]patch-$VERSION-$ACTION[-$DESCRIPTION].sql'**:
+
+    Where:
+       
+    * **$VERSION** - positive non-zero integer (leading zeros accepted)
+    * **$ACTION** - up/rb for update to version and rollback from version respectively
+    * **$DESCRIPTION** - any string matching **[0-9a-zA-Z\-\_]+**
+    
+    Example of valid patch file names:
+    
+    * **patch_1_up-update-to-version-1.sql**
+    * **patch_1_rb-rollback-from-version-1.sql**
+    * **patch_2_up.sql**
+ 
+Above parameters can be configured. (check **Configuration** section)
+
+### Configuration file
+
+N/A
 
 ## Basic usage
 
@@ -158,9 +180,10 @@ There are currently 3 ways in which pg-patch will try to connect to PostgreSQL.
     ```node
     require("pg-patch").run({
         client: pgClientInstance
-    }).then(function(done){
-        //example assumes success
-        done(); //pgClientInstance closed
+    }).then(function(){
+        pgClientInstance.end();
+    }, function(err){
+        pgClientInstance.end();
     });
     ```
 
