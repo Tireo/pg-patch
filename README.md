@@ -1,31 +1,44 @@
 # pg-patch
 
-PostgreSQL DB patching made easy.
+PostgreSQL patching made easy.
+
+[![Code Climate](https://codeclimate.com/github/Tireo/pg-patch/badges/gpa.svg)](https://codeclimate.com/github/Tireo/pg-patch)
+
+## NOTICE
+
+While it is a fully working work in progress... it is still work in progress.
+
+I'd be more than happy to hear some feedback.
+
+**Bugs can be present.**
 
 ## Features
 
 * Automatic migration from current version (or clean state) to newest version
-* Configurable source and target version patches (by ID or **[todo]** timestamp)
+* Configurable source and target version
 * Step by step forward / backward migration
 * Transactional migration with transaction strategy setting:
     * per migration step (rollback **<u>only</u>** failed step and end process)
     * per migration process (rollback **<u>whole</u>** migration process)
 * Dry runs 
     * log only (no DB manipulation with patch SQL)
-    * single transaction with rollback at the end
+    * single transaction with rollback at the end (or first error)
 * Configurable patch file name template
 * Recursive subfolder checking for patch files
 * Support for splitting migration step SQL into few files
     * patch files for the same migration step can be in different subdirectories
 * Configurable log level
 * Promise interface
+* (almost) fully async internally
+* lightweight: about 6 KB zipped
 
 ### planned:
 
-* Migration history
+* Patch history
 * Report generation support
 * Command line support
 * Configuration file support
+* Better organized log messages 
 
 ## Preparation
 
@@ -33,7 +46,7 @@ PostgreSQL DB patching made easy.
 All patch files need to:
 
 1. Be inside patch directory: **'pg-patch'** (or in any subdirectory)
-2. Follow naming convention: **'[$TIMESTAMP-]patch-$VERSION-$ACTION[-$DESCRIPTION].sql'**:
+2. Follow naming convention: **'patch-$VERSION-$ACTION[-$DESCRIPTION].sql'**:
 
     Where:
        
@@ -51,11 +64,11 @@ Above parameters can be configured. (check **Configuration** section)
 
 ### Configuration file
 
-N/A
+Soon <sup>TM</sup>
 
 ## Basic usage
 
-#### Smallest working example
+### Smallest working example
 
 Easiest way to use pg-patch is:
 
@@ -78,7 +91,22 @@ patcher.run();
 
 Both above examples have the same result.
 
-#### Supplying run-time configuration
+### Working with async API
+
+Any **pg-patch** process returns a promise.
+
+```node
+require("pg-patch").run(/*
+    any config
+*/).then(function(){
+    //handle success
+}, function(err){
+    //handle error
+});
+```
+
+
+### Supplying run-time configuration
 
 You can both supply configuration for given run:
 
@@ -92,7 +120,7 @@ As well as setting master configuration for pg-patch instance
 let patcher = require("pg-patch").create(configObject);
 ```
 
-##### Master configuration vs run configuration
+#### Master configuration vs run configuration
 
 If you specify both master and run configurations the run configuration properties have priority over master configuration ones:
 
@@ -118,7 +146,7 @@ patcher.run({
 });
 ```
 
-#### Connecting to the PostgreSQL
+### Connecting to the PostgreSQL
 
 There are currently 3 ways in which pg-patch will try to connect to PostgreSQL.
 
@@ -175,7 +203,7 @@ There are currently 3 ways in which pg-patch will try to connect to PostgreSQL.
 
     **IMPORTANT:** passed **pg.Client** instances are not closed automatically by **pg-patch**.
 
-    If You need to close them you can do this by using supplied done method.
+    If You need to close them you can do this using promise handlers.
 
     ```node
     require("pg-patch").run({
@@ -186,19 +214,158 @@ There are currently 3 ways in which pg-patch will try to connect to PostgreSQL.
         pgClientInstance.end();
     });
     ```
+    
+### Some quick copy'n'run examples
 
-## Configuration
+Custom patch dir & DB table configuration:
+```node
+require("pg-patch").run({
+    patchDir: 'my-db-patches',
+    dbTable: 'public.myPatchControlTable'
+});
+```
 
-* **targetVersion**
-* **sourceVersion**
-* **logLevel**
-* **enableColors**
-* **dbTable**
-* **dbSchema**
-* **actionUpdate**
-* **actionRollback**
-* **actionUpdate**
-* **patchFileTemplate**
+Custom pg.Client config:
+```node
+require("pg-patch").run({
+    client: {
+        user: 'me',
+        database: 'my_db',
+        password: 'pass',
+        host: 'localhost',
+        port: 5432
+    }
+});
+```
+
+Custom target version:
+```node
+require("pg-patch").run({
+    targetVersion: 10
+});
+```
+
+## Advanced usage
+
+So you want more? Granted!
+
+### Transaction control
+
+1. PER_VERSION_STEP **(default)**
+
+    ```node
+    require("pg-patch").run({
+        transactionMode: 'PER_VERSION_STEP'
+    });
+    ```
+        
+    In this transaction mode when You want to change DB version by more than one version **each update/rollback step will be contained in separate transaction block**. 
+    
+    So if you want to move from version **X** to version **X+5** and error happens during **X+3**:
+    
+    * **X+4** and **X+5** updates will never be tried
+    * **X+3** update will be rolled back
+    * whole patch process will end with error (Promise.reject)
+    * **BUT** the resulting DB version will be **X+2**
+
+2. SINGLE
+
+    ```node
+    require("pg-patch").run({
+        transactionMode: 'SINGLE'
+    });
+    ```
+        
+    In this transaction mode when You want to change DB version by more than one version **all update/rollback steps will be contained in single transaction block**. 
+    
+    So if you want to move from version **X** to version **X+5** and error happens during **X+3**:
+    
+    * **X+4** and **X+5** updates will never be tried
+    * **X+3**, **X+2** and **X+1** updates will be rolled back
+    * whole patch process will end with error (Promise.reject)
+    * the resulting DB version will be **X**
+
+### Multiple patch files per update/rollback step 
+
+Each patch action step (ex. update action to version X) can be comprised of many patch files.
+**Those files can be in ANY subdirectory of pg-patch**.
+
+If given action step has multiple patch files they will be run in order of ascending descriptions.
+
+If two or more patch files for given action step have the same description it is assumed they can be run in any order. 
+
+So if **update to X** action has given patch files:
+
+* patch-X-up-want-this-first.sql
+* patch-X-up.sql
+* subdir1/patch-X-up-data-part-2.sql
+* subdir2/patch-X-up-data-part-1.sql
+* structure/patch-X-up-0001-structure.sql
+* data/patch-X-up-0002-data.sql
+
+they will be joined in this order: 
+
+* patch-X-up.sql **(no descriptions first)**
+* structure/patch-X-up-0001-structure.sql **(subdirectories are ignored)**
+* data/patch-X-up-0002-data.sql 
+* subdir2/patch-X-up-data-part-1.sql
+* subdir1/patch-X-up-data-part-2.sql
+* patch-X-up-want-this-first.sql
+
+### Dry runs
+
+Dry runs are basically test runs to verify validity of patch files (either manually or directly on DB).
+
+**pg-patch** supports two types of dry run:
+
+1. **LOG_ONLY**
+
+    ```node
+    require("pg-patch").run({
+        dryRun: 'LOG_ONLY'
+    });
+    ```
+
+    This **WILL NOT** execute any patch SQL on DB. Maintenance SQL required for **pg-patch** to work will still be run.
+    
+    All patch SQL will be instead written to console on **INFO** level.
+
+2. **TEST_SQL**
+
+    ```node
+    require("pg-patch").run({
+        dryRun: 'TEST_SQL'
+    });
+    ```
+    
+    This **WILL** execute patch SQL on DB using transaction mode **'SINGLE'**.
+    
+    Patch process will fully rollback either on first error or after successful execution of patch SQL.
+
+### Configurable log
+
+It is possible to set desired configuration level. **(default: 'INFO')**
+```node
+require("pg-patch").run({
+    logLevel: 'SUCCESS'  //valid values: 'DEBUG', 'LOG', 'INFO', 'WARN', 'SUCCESS', 'ERROR', 'NONE'
+});
+```
+
+...as well as it being colorful: **(default: true)**
+```node
+require("pg-patch").run({
+    enableColorfulLogs: false
+});
+```
+
+## Configuration cheatsheet
+
+SOON<sup>TM</sup>
+
+## Common pitfalls
+
+1. Make sure DB user you're using has sufficient priviledges to run patch files.
+2. Do **NOT** include transaction control SQL (BEGIN; COMMIT; ROLLBACK; etc.) into your patch files.
 
 ## Miscellaneous
 
