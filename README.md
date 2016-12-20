@@ -60,9 +60,9 @@ All patch files need to:
     * **patch_1_rb-rollback-from-version-1.sql**
     * **patch_2_up.sql**
  
-Above parameters can be configured. (check **Configuration** section)
+Above parameters can be configured. (see **[Configuration](#configuration-cheatsheet)** section)
 
-### Configuration file
+### External configuration file
 
 Soon <sup>TM</sup>
 
@@ -76,8 +76,8 @@ Easiest way to use pg-patch is:
 require("pg-patch").run();
 ```
 
-Above code would use default configuration settings (see: **Configuration** section)
-and load DB connection settings from ENV variables. (see **node-postgres** npm package)
+Above code would use default configuration settings (see: **[Configuration](#configuration-cheatsheet)** section)
+and load DB connection settings from ENV variables. (see **[node-postgres](http://github.com/brianc/node-postgres)** npm package)
 
 It is also possible to create patcher instance and run it separately:
 
@@ -90,21 +90,6 @@ patcher.run();
 ```
 
 Both above examples have the same result.
-
-### Working with async API
-
-Any **pg-patch** process returns a promise.
-
-```node
-require("pg-patch").run(/*
-    any config
-*/).then(function(){
-    //handle success
-}, function(err){
-    //handle error
-});
-```
-
 
 ### Supplying run-time configuration
 
@@ -146,6 +131,20 @@ patcher.run({
 });
 ```
 
+### Working with async API
+
+Any **pg-patch** process returns a promise.
+
+```node
+require("pg-patch").run(/*
+    any config
+*/).then(function(){
+    //handle success
+}, function(err){
+    //handle error
+});
+```
+
 ### Connecting to the PostgreSQL
 
 There are currently 3 ways in which pg-patch will try to connect to PostgreSQL.
@@ -170,10 +169,9 @@ There are currently 3 ways in which pg-patch will try to connect to PostgreSQL.
     });
     ```
 
-    Client configuration object work exactly as in **[node-postgres](http://github.com/brianc/node-postgres)** npm package.
+    Client configuration object work exactly as in **[node-postgres](http://github.com/brianc/node-postgres)** package.
 
     ```node
-    //configObject example
     let clientConfig = {
         user: 'foo', //env var: PGUSER
         database: 'my_db', //env var: PGDATABASE
@@ -185,7 +183,13 @@ There are currently 3 ways in which pg-patch will try to connect to PostgreSQL.
     };
     ```
 
-    For more about **pg.Client** configuration check **node-postgres** npm package.
+    You can also use connection strings:
+
+    ```node
+    let clientConfig = 'postgres://user:password@host:port/database';
+    ```
+
+    For more about **pg.Client** configuration check **[node-postgres](http://github.com/brianc/node-postgres)** npm package.
 
 3. Use passed **pg.Client** instance
 
@@ -358,26 +362,32 @@ require("pg-patch").run({
 });
 ```
 
+### Custom patch file template
+
+Soon<sup>TM</sup>
+
 ## Configuration cheatsheet
 
-SOON<sup>TM</sup>
+List below contains all supported configuration properties:
+
+| property | default value | valid values | default |
+| ---|---|---|---|
+| logLevel | Configures how much log information will be shown | 'DEBUG',<br/>'LOG',<br/>'INFO',<br/>'WARN',<br/>'SUCCESS',<br/>'ERROR',<br/>'NONE' |INFO|
+| enableColorfulLogs | Use colors in log? | boolean | true |
+| client | DB connection client / settings<br/>See **[Connecting to the PostgreSQL](#connecting-to-the-postgresql)** section | string \| object | null |
+| dbTable| **pg-patch** maintenance table to be used.<br/>Can also define schema: **schema.table** | string | pgpatch |
+| dbSchema| Schema in which dbTable should exist | string | public |
+| dryRun| Run patch in dry run mode?<br/>See **[Dry runs](#dry-runs)** section | LOG_ONLY,<br/>TEST_SQL | null |
+| patchFileTemplate| Patch file name template<br/>See **[Custom patch file template](#custom-patch-file-template)** section | string | '^patch-{version}-{action}(?:-{description})?\\.sql$' |
+| patchDir| Directory where patch files can be found| string | pg-patch |
+| targetVersion| Version to which patch DB | integer>0 | newest patch version found |
+| sourceVersion| Version from which patch DB<br/>**IMPORTANT:** Normally this should not be used as it breaks normal patching route. Use only when really needed. | integer>0 | current DB version |
+| transactionMode| Transaction mode to be used when patching DB<br/>See **[Transaction control](#transaction-conrtol)** section | PER_VERSION_STEP,<br/>SINGLE| PER_VERSION_STEP |
 
 ## Common pitfalls
 
 1. Make sure DB user you're using has sufficient priviledges to run patch files.
 2. Do **NOT** include transaction control SQL (BEGIN; COMMIT; ROLLBACK; etc.) into your patch files.
-
-## Miscellaneous
-
-To generate current complexity report simply use plato:
-
-```node
-npm install -g plato
-```
-
-```node
-plato -r -d report lib
-```
 
 ## Licence
 
