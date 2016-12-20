@@ -23,6 +23,7 @@ I'd be more than happy to hear some feedback.
 * Dry runs 
     * log only (no DB manipulation with patch SQL)
     * single transaction with rollback at the end (or first error)
+* Command line support
 * Configurable patch file name template
 * Recursive subfolder checking for patch files
 * Support for splitting migration step SQL into few files
@@ -35,12 +36,20 @@ I'd be more than happy to hear some feedback.
 ### planned:
 
 * Patch history
+* Easier patch filename template configuration
 * Report generation support
-* Command line support
 * Configuration file support
 * Better organized log messages 
 
 ## Preparation
+
+### Installing pg-patch
+
+To install **pg-patch** in your node project just run this command:
+
+```
+npm i pg-patch --save
+```
 
 ### Patch files
 All patch files need to:
@@ -76,8 +85,8 @@ Easiest way to use pg-patch is:
 require("pg-patch").run();
 ```
 
-Above code would use default configuration settings (see: **[Configuration](#configuration-cheatsheet)** section)
-and load DB connection settings from ENV variables. (see **[node-postgres](http://github.com/brianc/node-postgres)** npm package)
+Above code would use default configuration settings (see: **[Configuration](#configuration-cheatsheet)**)
+and load DB connection settings from ENV variables. (see **[pg](https://www.npmjs.com/package/pg)**)
 
 It is also possible to create patcher instance and run it separately:
 
@@ -169,7 +178,7 @@ There are currently 3 ways in which pg-patch will try to connect to PostgreSQL.
     });
     ```
 
-    Client configuration object work exactly as in **[node-postgres](http://github.com/brianc/node-postgres)** package.
+    Client configuration object work exactly as in **[pg](https://www.npmjs.com/package/pg)** package.
 
     ```node
     let clientConfig = {
@@ -189,7 +198,7 @@ There are currently 3 ways in which pg-patch will try to connect to PostgreSQL.
     let clientConfig = 'postgres://user:password@host:port/database';
     ```
 
-    For more about **pg.Client** configuration check **[node-postgres](http://github.com/brianc/node-postgres)** npm package.
+    For more about **pg.Client** configuration check **[pg](https://www.npmjs.com/package/pg)** npm package.
 
 3. Use passed **pg.Client** instance
 
@@ -248,6 +257,30 @@ require("pg-patch").run({
     targetVersion: 10
 });
 ```
+
+### Command line tool
+
+To use **pg-patch** as a command line tool first install it globally:
+
+```
+npm i pg-patch -g
+```
+
+Afterwards its as easy as running:
+
+```
+pg-patch
+```
+
+Adding configuration is easy:
+
+```
+pg-patch --logLevel=INFO --client=postgres://user:password@host:port/database
+```
+
+List of possible **[configuration properties](#configuration-cheatsheet)** is the same as usual.
+
+For detailed description about passing command line arguments see **[yargs](https://www.npmjs.com/package/yargs)**
 
 ## Advanced usage
 
