@@ -1,8 +1,24 @@
-const jshint = require('gulp-jshint');
-const gulp   = require('gulp');
+const gulp = require('gulp');
 
-gulp.task('lint', function() {
-    return gulp.src('lib/*.js')
+const jshint = require('gulp-jshint');
+const jasmine = require('gulp-jasmine');
+const JasmineConsoleReporter = require('jasmine-console-reporter');
+
+gulp.task('lint', () =>
+    gulp.src('lib/*.js')
         .pipe(jshint())
-        .pipe(jshint.reporter('default'));
-});
+        .pipe(jshint.reporter('default'))
+);
+
+gulp.task('test', () =>
+    gulp.src('spec/**/*.js')
+        .pipe(jasmine({
+            reporter: new JasmineConsoleReporter({
+                colors: 1,           // (0|false)|(1|true)|2
+                cleanStack: 1,       // (0|false)|(1|true)|2|3
+                verbosity: 4,        // (0|false)|1|2|(3|true)|4
+                listStyle: 'indent', // "flat"|"indent"
+                activity: false
+            })
+        }))
+);

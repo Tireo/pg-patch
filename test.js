@@ -12,6 +12,6 @@ let ownClient = {
 };
 
 let patcher = pgPatcher.create({
-    client: ownClient,
+    //client: ownClient,
     targetVersion: 0
 }).run();

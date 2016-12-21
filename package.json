@@ -1,10 +1,10 @@
 {
   "name": "pg-patch",
   "version": "0.6.2",
-  "description": "Node PostgreSQL patching utility",
+  "description": "PostgreSQL patching made easy.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "gulp test"
   },
   "bin": "./bin/pg-patch.js",
   "repository": {
@@ -24,7 +24,9 @@
   },
   "devDependencies": {
     "gulp": "^3.9.1",
+    "gulp-jasmine": "^2.4.2",
     "gulp-jshint": "^2.0.4",
+    "jasmine-console-reporter": "^1.2.7",
     "jshint": "^2.9.4"
   },
   "engines": {

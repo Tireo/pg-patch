@@ -1,6 +1,6 @@
 # pg-patch
 
-PostgreSQL patching made easy.
+Node PostgreSQL patching utility.
 
 [![Code Climate](https://codeclimate.com/github/Tireo/pg-patch/badges/gpa.svg)](https://codeclimate.com/github/Tireo/pg-patch)
 
@@ -23,8 +23,8 @@ I'd be more than happy to hear some feedback.
 * Dry runs 
     * log only (no DB manipulation with patch SQL)
     * single transaction with rollback at the end (or first error)
-* Command line support
 * Configurable patch file name template
+* Command line support
 * Recursive subfolder checking for patch files
 * Support for splitting migration step SQL into few files
     * patch files for the same migration step can be in different subdirectories
@@ -36,9 +36,7 @@ I'd be more than happy to hear some feedback.
 ### planned:
 
 * Patch history
-* Easier patch filename template configuration
 * Report generation support
-* Configuration file support
 * Better organized log messages 
 
 ## Preparation
@@ -99,6 +97,20 @@ patcher.run();
 ```
 
 Both above examples have the same result.
+
+### Creating configuration file
+
+If you create `.pgpatchrc.json` file **pg-patch** will use it as a source for initial configuration.
+ 
+Example `.pgpatchrc.json`:
+
+```javascript
+{
+  "logLevel": "LOG",
+  "client": "postgres://user:password@host:port/database",
+  "dryRun": "LOG_ONLY"
+}
+```
 
 ### Supplying run-time configuration
 
@@ -397,30 +409,92 @@ require("pg-patch").run({
 
 ### Custom patch file template
 
-Soon<sup>TM</sup>
+By default all patch files need to match given regex template: `^patch-$VERSION-$ACTION(?:-$DESCRIPTION)?\\.sql$`   
+
+Each **$VAR** has distinct logic usage but for the regex purposes are shortcuts for:
+
++ **$VERSION** — `\\d+` **(required)**   
+Version associated with **$ACTION**.
++ **$ACTION** — `up|rb` **(required)**   
+Action to perform. `up` means "update TO **$VERSION**" where `rb` means "rollback FROM **$VERSION**".
++ **$DESCRIPTION** — `[0-9a-zA-Z\-\_]+`   
+Optional description.
+
+Double backslashes is above replacements are required due to how `new Regex()` works.   
+Each of those **$VARS** are then inserted are regex groups (that is the reason why **$ACTION** can look like it looks).
+
+So in this case the final regex checking if file is a patch file is:   
+`^(?:(?:\d+)-)?patch-(?:\d+)-(?:up|rb)(?:-(?:[0-9a-zA-Z-_]+))?\.sql$`
+
+Don't worry if You don't fully understand above.   
+What matters that You can easily change how it works.
+
+**Examples:**
+
+1. Patch files should only contain version and action:
+
+   ```node
+   require("pg-patch").run({
+       patchFileTemplate : '^$VERSION-$ACTION\\.sql$'
+   });
+   ```
+   
+2. Patch files should REQUIRE a description and start with patch-:
+
+  ```node
+  require("pg-patch").run({
+      patchFileTemplate : '^patch-$VERSION-$ACTION-$DESCRIPTION\\.sql$'
+  });
+  ```
 
 ## Configuration cheatsheet
 
-List below contains all supported configuration properties:
++ **logLevel** — Type: `String` Default: `INFO`   
+Configures how much log information will be shown.
 
-| property | default value | valid values | default |
-| ---|---|---|---|
-| logLevel | Configures how much log information will be shown | 'DEBUG',<br/>'LOG',<br/>'INFO',<br/>'WARN',<br/>'SUCCESS',<br/>'ERROR',<br/>'NONE' |INFO|
-| enableColorfulLogs | Use colors in log? | boolean | true |
-| client | DB connection client / settings<br/>See **[Connecting to the PostgreSQL](#connecting-to-the-postgresql)** section | string \| object | null |
-| dbTable| **pg-patch** maintenance table to be used.<br/>Can also define schema: **schema.table** | string | pgpatch |
-| dbSchema| Schema in which dbTable should exist | string | public |
-| dryRun| Run patch in dry run mode?<br/>See **[Dry runs](#dry-runs)** section | LOG_ONLY,<br/>TEST_SQL | null |
-| patchFileTemplate| Patch file name template<br/>See **[Custom patch file template](#custom-patch-file-template)** section | string | '^patch-{version}-{action}(?:-{description})?\\.sql$' |
-| patchDir| Directory where patch files can be found| string | pg-patch |
-| targetVersion| Version to which patch DB | integer>0 | newest patch version found |
-| sourceVersion| Version from which patch DB<br/>**IMPORTANT:** Normally this should not be used as it breaks normal patching route. Use only when really needed. | integer>0 | current DB version |
-| transactionMode| Transaction mode to be used when patching DB<br/>See **[Transaction control](#transaction-conrtol)** section | PER_VERSION_STEP,<br/>SINGLE| PER_VERSION_STEP |
++ **enableColorfulLogs** — Type: `Boolean` Default: `true`   
+Should colors be used in log?
+
++ **client** — Type: `Object|String` Default: `null`   
+DB connection client / settings. See **[Connecting to the PostgreSQL](#connecting-to-the-postgresql)** section
+
++ **dbTable** — Type: `String` Default: `pgpatch`   
+**pg-patch** maintenance table to be used. Can also define schema: **schema.table**
+
++ **dbSchema** — Type: `String` Default: `public`   
+Schema in which dbTable should exist.
+
++ **dryRun** — Type: `String` Default: `null`   
+Run patch in dry run mode? See **[Dry runs](#dry-runs)** section.
+
++ **patchFileTemplate** — Type: `String` Default: `^patch-$VERSION-$ACTION(?:-$DESCRIPTION)?\\.sql$`   
+Patch file name template. See **[Custom patch file template](#custom-patch-file-template)** section.
+
++ **patchDir** — Type: `String` Default: `pg-patch`   
+Directory where patch files can be found.
+
++ **targetVersion** — Type: `Integer` Default: `null`   
+Version to which patch DB. If not passed newest patch file version is used.
+
++ **sourceVersion** — Type: `Integer` Default: `null`   
+Version from which patch DB. When not passed current version is used.
+<br/>**IMPORTANT:** Normally this should not be used as it breaks normal patching route. Use only when really needed.
+
++ **transactionMode** — Type: `String` Default: `PER_VERSION_STEP`   
+Transaction mode to be used when patching DB. See **[Transaction control](#transaction-conrtol)** section.
 
 ## Common pitfalls
 
 1. Make sure DB user you're using has sufficient priviledges to run patch files.
 2. Do **NOT** include transaction control SQL (BEGIN; COMMIT; ROLLBACK; etc.) into your patch files.
+
+## Testing
+
+To test **pg-patch** simply run:
+
+```
+gulp test
+```
 
 ## Licence
 
