@@ -48,3 +48,6 @@ Temporary Items
 /.idea/
 /node_modules/
 /report/
+/reports/
+/coverage/
+/4me.txt

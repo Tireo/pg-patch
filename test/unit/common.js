@@ -1,6 +1,6 @@
 'use strict';
 
-let common = require("../lib/common");
+let common = require("../../lib/common");
 
 describe("common.determineValue", function() {
     it("returns first defined value", function() {

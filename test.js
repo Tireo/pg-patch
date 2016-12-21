@@ -12,6 +12,6 @@ let ownClient = {
 };
 
 let patcher = pgPatcher.create({
-    //client: ownClient,
-    targetVersion: 0
+    client: "postgres://test:test@localhost:5432/test",
+    dryRun: 'TEST_SQL'
 }).run();
