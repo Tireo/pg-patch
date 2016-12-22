@@ -26,6 +26,7 @@ I'd be more than happy to hear some feedback.
     * single transaction with rollback at the end (or first error)
 * Configurable patch file name template
 * Command line support
+* Patch history
 * Recursive subfolder checking for patch files
 * Support for splitting migration step SQL into few files
     * patch files for the same migration step can be in different subdirectories
@@ -36,7 +37,6 @@ I'd be more than happy to hear some feedback.
 
 ### planned:
 
-* Patch history
 * Report generation support
 * Better organized log messages 
 
