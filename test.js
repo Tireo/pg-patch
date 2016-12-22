@@ -12,7 +12,7 @@ let ownClient = {
 };
 
 let patcher = pgPatcher.create({
-    patchFileTemplate: '$SOURCE-$TARGET\\.sql',
+    patchFileTemplate: '^$SOURCE-$TARGET\\.sql$',
     //targetVersion: 0,
     //transactionMode: 'SINGLE',
     client: "postgres://test:test@localhost:5432/test"

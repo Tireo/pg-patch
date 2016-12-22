@@ -105,7 +105,7 @@ If you create `.pgpatchrc.json` file **pg-patch** will use it as a source for in
  
 Example `.pgpatchrc.json`:
 
-```javascript
+```json
 {
   "logLevel": "LOG",
   "client": "postgres://user:password@host:port/database",
@@ -414,12 +414,18 @@ By default all patch files need to match given regex template: `^patch-$VERSION-
 
 Each **$VAR** has distinct logic usage but for the regex purposes are shortcuts for:
 
-+ **$VERSION** — `\\d+` **(required)**   
++ **$VERSION** — `\\d+`   
 Version associated with **$ACTION**.
-+ **$ACTION** — `up|rb` **(required)**   
++ **$ACTION** — `up|rb`  
 Action to perform. `up` means "update TO **$VERSION**" where `rb` means "rollback FROM **$VERSION**".
++ **$SOURCE** — `\\d+`   
+Source version. Can only be used with **$TARGET**.
++ **$TARGET** — `\\d+`  
+Target version. Can only be used together with **$SOURCE**.
 + **$DESCRIPTION** — `[0-9a-zA-Z\-\_]+`   
 Optional description.
+
+**Important:** template requires (**$VERSION** AND **$ACTION**) OR (**$SOURCE** AND **$TARGET**). Those cannot be combined.
 
 Double backslashes is above replacements are required due to how `new Regex()` works.   
 Each of those **$VARS** are then inserted are regex groups (that is the reason why **$ACTION** can look like it looks).
@@ -487,7 +493,10 @@ Transaction mode to be used when patching DB. See **[Transaction control](#trans
 ## Common pitfalls
 
 1. Make sure DB user you're using has sufficient priviledges to run patch files.
-2. Do **NOT** include transaction control SQL (BEGIN; COMMIT; ROLLBACK; etc.) into your patch files.
+2. Do **NOT** include transaction control SQL (`BEGIN;` `COMMIT;` `ROLLBACK;` etc.) into your patch files.
+3. Patch files need to be incremental and in steps of 1 version.   
+Specifying jump from version `1` to version `5` in one file will not work.
+4. Initial version number is `0`. So first patch file needs to update to version `1`.
 
 ## Testing
 

@@ -1,11 +1,11 @@
 {
   "name": "pg-patch",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "PostgreSQL patching made easy.",
   "main": "index.js",
   "scripts": {
     "test": "gulp test",
-    "coverage": "istanbul cover ./node_modules/jasmine/bin/jasmine.js ./test/unit/*.js"
+    "coverage": "istanbul cover node_modules/jasmine/bin/jasmine.js lib/*.js test/unit/*.js"
   },
   "bin": "./bin/pg-patch.js",
   "repository": {
