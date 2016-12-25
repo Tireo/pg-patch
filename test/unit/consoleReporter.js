@@ -4,14 +4,82 @@ const common = require('../../lib/common');
 const pgPatchConsole = require("../../lib/consoleReporter");
 
 describe("consoleReporter", function() {
-    it("can be created", function () {
+    it("creation", function () {
         let tmpConsole;
 
         expect(() => {
             tmpConsole = new pgPatchConsole();
         }).not.toThrow();
+    });
 
+    it("configuration", function () {
+        spyOn(pgPatchConsole.prototype, 'createHandlers').and.callThrough();
+
+        let tmpConsole = new pgPatchConsole();
+
+        //creates handlers during creation
+        expect(pgPatchConsole.prototype.createHandlers).toHaveBeenCalled();
+
+        //default
         expect(tmpConsole.logLevel).toEqual(common.logLevels.INFO);
         expect(tmpConsole.enableColorfulLogs).toEqual(true);
+
+        //config based
+        tmpConsole = new pgPatchConsole({
+            logLevel: 'LOG',
+            enableColorfulLogs: false
+        });
+        expect(tmpConsole.logLevel).toEqual(common.logLevels.LOG);
+        expect(tmpConsole.enableColorfulLogs).toEqual(false);
+
+        //wrong values go to default
+        tmpConsole = new pgPatchConsole({
+            logLevel: 'XYZ'
+        });
+        expect(tmpConsole.logLevel).toEqual(common.logLevels.INFO);
+    });
+
+    it("handlers creation", function () {
+        let mock = function(){};
+        mock.prototype = pgPatchConsole.prototype;
+
+        let mockInstance = new mock();
+
+        for(let lvl in common.logLevels){
+            expect(mockInstance[lvl.toLowerCase()]).not.toBeDefined();
+        }
+
+        mockInstance.createHandlers();
+
+        for(let lvl in common.logLevels){
+            expect(mockInstance[lvl.toLowerCase()]).toBeDefined();
+        }
+    });
+
+    describe("handlers", function () {
+        let tmpConsole;
+
+        beforeEach(function(){
+            tmpConsole = new pgPatchConsole({
+                logLevel: 'DEBUG',
+                enableColorfulLogs: false
+            });
+
+            spyOn(console, 'log'); //.and.callThrough();
+
+            for(let lvl in common.logLevels){
+                spyOn(tmpConsole, lvl.toLowerCase()).and.callThrough();
+            }
+        });
+
+        it("onMsg", function(){
+            for(let lvl in common.logLevels){
+                if(lvl !== 'NONE'){
+                    tmpConsole.onMsg(`LOG:${lvl}`, lvl);
+                    expect(tmpConsole[lvl.toLowerCase()]).toHaveBeenCalled();
+                    expect(console.log).toHaveBeenCalledWith(`[${lvl}][pg-patcher]`, lvl);
+                }
+            }
+        });
     });
 });

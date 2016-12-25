@@ -70,10 +70,6 @@ All patch files need to:
  
 Above parameters can be configured. (see **[Configuration](#configuration-cheatsheet)** section)
 
-### External configuration file
-
-Soon <sup>TM</sup>
-
 ## Basic usage
 
 ### Smallest working example

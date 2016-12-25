@@ -1,14 +1,14 @@
 'use strict';
 
 const common = require('../../lib/common');
-const pgPatchFileScanner = require("../../lib/file-scanner");
+const pgPatchProcess = require("../../lib/process");
 
-describe("file-scanner", function() {
+describe("process", function() {
     it("can be created", function () {
         let tmp;
 
         expect(() => {
-            tmp = new pgPatchFileScanner();
+            tmp = new pgPatchProcess();
         }).not.toThrow();
 
         //add default properties check
