@@ -461,11 +461,8 @@ Should colors be used in log?
 + **client** — Type: `Object|String` Default: `null`   
 DB connection client / settings. See **[Connecting to the PostgreSQL](#connecting-to-the-postgresql)** section
 
-+ **dbTable** — Type: `String` Default: `pgpatch`   
-**pg-patch** maintenance table to be used. Can also define schema: **schema.table**
-
-+ **dbSchema** — Type: `String` Default: `public`   
-Schema in which dbTable should exist.
++ **dbTable** — Type: `String` Default: `public.pgpatch`   
+**pg-patch** maintenance table to be used. Can also define schema: **schema.table**. If no `schema` is passed `public` is assumed.
 
 + **dryRun** — Type: `String` Default: `null`   
 Run patch in dry run mode? See **[Dry runs](#dry-runs)** section.

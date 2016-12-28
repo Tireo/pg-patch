@@ -1,9 +1,11 @@
+'use strict';
+
 const gulp = require('gulp');
 
 const jshint = require('gulp-jshint');
 const jasmine = require('gulp-jasmine');
 const JasmineConsoleReporter = require('jasmine-console-reporter');
-
+const argv = require('yargs').argv;
 
 gulp.task('lint', () =>
     gulp.src(['lib/*.js'])
@@ -11,15 +13,18 @@ gulp.task('lint', () =>
         .pipe(jshint.reporter('default'))
 );
 
-gulp.task('test', () =>
-    gulp.src(['test/unit/*.js'])
+gulp.task('test', () => {
+
+    let files = argv.subset ? `test/unit/*${argv.subset}*.js` : `test/unit/*.js`;
+
+    return gulp.src([files])
         .pipe(jasmine({
             reporter: new JasmineConsoleReporter({
-                colors: 1,           // (0|false)|(1|true)|2
-                cleanStack: 1,       // (0|false)|(1|true)|2|3
-                verbosity: 4,        // (0|false)|1|2|(3|true)|4
-                listStyle: 'indent', // "flat"|"indent"
+                colors: 1,
+                cleanStack: 1,
+                verbosity: 4,
+                listStyle: 'indent',
                 activity: false
             })
-        }))
-);
+        }));
+});
