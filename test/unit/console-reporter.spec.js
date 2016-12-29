@@ -1,7 +1,7 @@
 'use strict';
 
 const common = require('../../lib/common');
-const pgPatchConsole = require("../../lib/consoleReporter");
+const pgPatchConsole = require("../../lib/console-reporter");
 
 describe("consoleReporter", function() {
     it("creation", function () {

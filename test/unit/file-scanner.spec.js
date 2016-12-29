@@ -6,13 +6,13 @@ const pgPatchFileScanner = require("../../lib/file-scanner");
 describe("file-scanner", function() {
     let tmp;
 
-    it("creation", function () {
+    it("creation", () => {
         expect(() => {
             tmp = new pgPatchFileScanner();
         }).not.toThrow();
     });
 
-    it("configuration", function () {
+    it("configuration", () => {
         //default configuration
         tmp = new pgPatchFileScanner();
 
@@ -33,5 +33,19 @@ describe("file-scanner", function() {
         expect(tmp.actionRollback).toEqual('back');
         expect(tmp.patchFileTemplate).toEqual('aaa');
         expect(tmp.patchDir).toEqual('bbb');
+    });
+
+    it(".createPatchFileRegexGroup", () => {
+        tmp = new pgPatchFileScanner();
+
+        //capturing test
+        expect(tmp.createPatchFileRegexGroup('version', true)).toEqual('(\\d+)');
+        expect(tmp.createPatchFileRegexGroup('version', false)).toEqual('(?:\\d+)');
+
+        //other groups test
+        expect(tmp.createPatchFileRegexGroup('action', true)).toEqual(`(${tmp.actionUpdate}|${tmp.actionRollback})`);
+        expect(tmp.createPatchFileRegexGroup('source', true)).toEqual('(\\d+)');
+        expect(tmp.createPatchFileRegexGroup('target', true)).toEqual('(\\d+)');
+        expect(tmp.createPatchFileRegexGroup('description', true)).toEqual('([0-9a-zA-Z\-\_]+)');
     });
 });

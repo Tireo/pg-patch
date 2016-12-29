@@ -32,7 +32,7 @@ I'd be more than happy to hear some feedback.
     * patch files for the same migration step can be in different subdirectories
 * Configurable log level
 * Promise interface
-* (almost) fully async internally
+* fully async internally (where possible)
 * lightweight: about 6 KB zipped
 
 ### planned:

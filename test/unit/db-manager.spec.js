@@ -2,6 +2,7 @@
 
 const common = require('../../lib/common');
 const pgPatchDbManager = require("../../lib/db-manager");
+const q = require('q');
 const pg = require('pg');
 
 describe("db-manager", function() {
@@ -14,8 +15,6 @@ describe("db-manager", function() {
     });
 
     it("configuration", function () {
-
-
         //default
         tmp = new pgPatchDbManager();
         expect(tmp.dbTable).toEqual("pgpatch");
@@ -43,21 +42,112 @@ describe("db-manager", function() {
         expect(tmp.client).toEqual(null);
         tmp.createClient();
         expect(tmp.client instanceof pg.Client).toEqual(true);
+        expect(tmp.ownPgClient).toEqual(true);
 
         //string instance
         tmp = new pgPatchDbManager({ client: "dbConnectionString" });
         tmp.createClient();
         expect(tmp.client instanceof pg.Client).toEqual(true);
+        expect(tmp.ownPgClient).toEqual(true);
 
         //object config
         tmp = new pgPatchDbManager({ client: { port: 1000 } });
         tmp.createClient();
         expect(tmp.client instanceof pg.Client).toEqual(true);
+        expect(tmp.ownPgClient).toEqual(true);
 
         //pg.Client config
         tmp = new pgPatchDbManager({ client: new pg.Client() });
         tmp.createClient();
         expect(tmp.client instanceof pg.Client).toEqual(true);
+        expect(tmp.ownPgClient).toEqual(false);
+    });
+
+    it(".getDBPatchTableName", function(){
+        tmp = new pgPatchDbManager({
+            dbTable: 'aaa'
+        });
+        expect(tmp.getDBPatchTableName()).toEqual("public.aaa");
+
+        tmp = new pgPatchDbManager({
+            dbTable: 'bbb.aaa'
+        });
+        expect(tmp.getDBPatchTableName()).toEqual("bbb.aaa");
+    });
+
+    it(".closeIfNeeded", function(){
+        tmp = new pgPatchDbManager();
+        tmp.createClient();
+        spyOn(tmp.client, 'end');
+
+        tmp.closeIfNeeded();
+        expect(tmp.client.end).toHaveBeenCalled();
+    });
+
+    it(".tableExists", function(done){
+        tmp = new pgPatchDbManager();
+
+        spyOn(tmp, 'query').and.callFake(() => {
+            return q({
+                rows: [{
+                    exists: "dummy"
+                }]
+            });
+        });
+
+        tmp.tableExists('table','schema').then(exists => {
+            expect(exists).toEqual("dummy");
+
+            expect(tmp.query).toHaveBeenCalledWith(`SELECT EXISTS (SELECT 1 FROM information_schema.tables
+WHERE table_schema = $1
+AND table_name = $2);`, ['schema', 'table']);
+            done();
+        })
+    });
+
+    it(".columnExists", function(done){
+        tmp = new pgPatchDbManager();
+
+        spyOn(tmp, 'query').and.callFake(() => {
+            return q({
+                rows: [{
+                    exists: "dummy"
+                }]
+            });
+        });
+
+        tmp.columnExists('column','table','schema').then(exists => {
+            expect(exists).toEqual("dummy");
+
+            expect(tmp.query).toHaveBeenCalledWith(`SELECT EXISTS (SELECT table_schema, table_name, column_name
+FROM information_schema.columns
+where table_schema = $1 AND table_name=$2 AND column_name=$3);`, ['schema', 'table', 'column']);
+            done();
+        })
+    });
+
+    it(".createPatchDataTable", function(done){
+        tmp = new pgPatchDbManager();
+
+        spyOn(tmp, 'query').and.callFake(() => {
+            return q();
+        });
+
+        tmp.createPatchDataTable().then(() => {
+            expect(tmp.query).toHaveBeenCalledWith(`create table ${tmp.getDBPatchTableName()} (
+id serial PRIMARY KEY,
+source_version integer,
+target_version integer,
+comment text, 
+patch_time timestamp without time zone default now());`);
+
+            expect(tmp.query).toHaveBeenCalledWith(`insert into ${tmp.getDBPatchTableName()} 
+(target_version, comment) 
+VALUES 
+(0, 'initial pgPatch state')`);
+
+            done();
+        })
     });
 
     describe(".query", function(){
@@ -97,47 +187,4 @@ describe("db-manager", function() {
             });
         });
     });
-
-    it(".getDBPatchTableName", function(){
-        tmp = new pgPatchDbManager({
-            dbTable: 'aaa'
-        });
-        expect(tmp.getDBPatchTableName()).toEqual("public.aaa");
-
-        tmp = new pgPatchDbManager({
-            dbTable: 'bbb.aaa'
-        });
-        expect(tmp.getDBPatchTableName()).toEqual("bbb.aaa");
-    });
-
-    /*describe(".connect", function() {
-        it("promise interface", function (done) {
-            tmp = new pgPatchDbManager({client: new pg.Client()});
-
-            //successfull query
-            spyOn(tmp.client, 'connect').and.callFake(function (query, values, callback) {
-                callback(null, 1);
-            });
-
-            tmp.connect().then(function (result) {
-                expect(result).toEqual(1);
-            }).finally(() => {
-                //error query
-                tmp.client.connect.and.callFake(function (query, values, callback) {
-                    callback("error", 1);
-                });
-
-                tmp.connect().then(function (result) {
-                    console.info("result",result);
-                    expect(result).toEqual(undefined);
-                }).catch((err) => {
-                    console.info("err",result);
-                    expect(err).toEqual("error");
-                }).finally(() => {
-                    console.log("1111");
-                    done();
-                });
-            });
-        });
-    });*/
 });
