@@ -21,7 +21,7 @@ describe("consoleReporter", function() {
         expect(pgPatchConsole.prototype.createHandlers).toHaveBeenCalled();
 
         //default
-        expect(tmpConsole.logLevel).toEqual(common.logLevels.INFO);
+        expect(tmpConsole.logLevel).toEqual(common.logLevel.INFO);
         expect(tmpConsole.enableColorfulLogs).toEqual(true);
 
         //config based
@@ -29,14 +29,14 @@ describe("consoleReporter", function() {
             logLevel: 'LOG',
             enableColorfulLogs: false
         });
-        expect(tmpConsole.logLevel).toEqual(common.logLevels.LOG);
+        expect(tmpConsole.logLevel).toEqual(common.logLevel.LOG);
         expect(tmpConsole.enableColorfulLogs).toEqual(false);
 
         //wrong values go to default
         tmpConsole = new pgPatchConsole({
             logLevel: 'XYZ'
         });
-        expect(tmpConsole.logLevel).toEqual(common.logLevels.INFO);
+        expect(tmpConsole.logLevel).toEqual(common.logLevel.INFO);
     });
 
     it("handlers creation", function () {
@@ -45,13 +45,13 @@ describe("consoleReporter", function() {
 
         let mockInstance = new mock();
 
-        for(let lvl in common.logLevels){
+        for(let lvl in common.logLevel){
             expect(mockInstance[lvl.toLowerCase()]).not.toBeDefined();
         }
 
         mockInstance.createHandlers();
 
-        for(let lvl in common.logLevels){
+        for(let lvl in common.logLevel){
             expect(mockInstance[lvl.toLowerCase()]).toBeDefined();
         }
     });
@@ -67,13 +67,13 @@ describe("consoleReporter", function() {
 
             spyOn(console, 'log'); //.and.callThrough();
 
-            for(let lvl in common.logLevels){
+            for(let lvl in common.logLevel){
                 spyOn(tmpConsole, lvl.toLowerCase()).and.callThrough();
             }
         });
 
         it("onMsg", function(){
-            for(let lvl in common.logLevels){
+            for(let lvl in common.logLevel){
                 if(lvl !== 'NONE'){
                     tmpConsole.onMsg(`LOG:${lvl}`, lvl);
                     expect(tmpConsole[lvl.toLowerCase()]).toHaveBeenCalled();

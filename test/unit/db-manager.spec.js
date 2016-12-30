@@ -19,7 +19,7 @@ describe("db-manager", function() {
         tmp = new pgPatchDbManager();
         expect(tmp.dbTable).toEqual("pgpatch");
         expect(tmp.dbSchema).toEqual("public");
-        expect(tmp.dryRun).toEqual(null);
+        expect(tmp.dryRunMode).toEqual(null);
 
         //configuration
         tmp = new pgPatchDbManager({
@@ -28,13 +28,13 @@ describe("db-manager", function() {
         });
         expect(tmp.dbTable).toEqual("sometable");
         expect(tmp.dbSchema).toEqual("someschema");
-        expect(tmp.dryRun).toEqual(common.dryRun.LOG_ONLY);
+        expect(tmp.dryRunMode).toEqual(common.dryRunMode.LOG_ONLY);
 
         //wrong dryRun value
         tmp = new pgPatchDbManager({
             dryRun: "1"
         });
-        expect(tmp.dryRun).toEqual(null);
+        expect(tmp.dryRunMode).toEqual(null);
     });
 
     it(".createClient", function(){
@@ -264,7 +264,7 @@ values
 
         it("dryRun.LOG_ONLY", function() {
             tmp = new pgPatchDbManager({
-                dryRun: common.dryRun.LOG_ONLY
+                dryRun: common.dryRunMode.LOG_ONLY
             });
 
             spyOn(tmp, 'msg');

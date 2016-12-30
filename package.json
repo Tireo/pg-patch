@@ -1,6 +1,6 @@
 {
   "name": "pg-patch",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "description": "PostgreSQL patching made easy.",
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,8 @@
     "gulp": "^3.9.1",
     "gulp-jasmine": "^2.4.2",
     "gulp-jshint": "^2.0.4",
-    "jasmine-console-reporter": "^1.2.7"
+    "jasmine-console-reporter": "^1.2.7",
+    "jshint": "^2.9.4"
   },
   "engines": {
     "node": ">=4.0"

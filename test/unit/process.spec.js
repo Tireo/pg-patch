@@ -4,13 +4,11 @@ const common = require('../../lib/common');
 const pgPatchProcess = require("../../lib/process");
 
 describe("process", function() {
-    it("can be created", function () {
-        let tmp;
+    let tmp;
 
+    it("creation", function () {
         expect(() => {
-            tmp = new pgPatchProcess();
+            new pgPatchProcess();
         }).not.toThrow();
-
-        //add default properties check
     });
 });

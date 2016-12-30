@@ -1,3 +1,8 @@
+0.8.6 / 2016-12-30
+==================
+* fixed possible wrong execution order of multiple patch files for one patch step
+* maintenance (code coverage, refactoring etc.)
+
 0.8.5 / 2016-12-30
 ==================
 * added CHANGELOG.md file
