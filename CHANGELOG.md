@@ -1,6 +1,7 @@
 0.8.5 / 2016-12-30
 ==================
 * added CHANGELOG.md file
+* maintenance (code coverage, refactoring etc.)
 
 0.8.4 / 2016-12-29
 ==================
