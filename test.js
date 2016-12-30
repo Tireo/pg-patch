@@ -14,8 +14,9 @@ let ownClient = {
 let patcher = pgPatcher.create({
     //patchFileTemplate: '^$SOURCE-$TARGET\\.sql$',
     logLevel: 'DEBUG',
-    //sourceVersion: 0,
+    sourceVersion: 0,
     targetVersion: 2,
+    dryRun: 'LOG_ONLY',
     //transactionMode: 'SINGLE',
     client: "postgres://test:test@localhost:5432/test"
 }).run();

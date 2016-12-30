@@ -22,6 +22,20 @@ describe("common", function() {
         expect(common.generateVersionSequence(4, 0)).toEqual([4,3,2,1]); //ROLLBACK needs 4-rb, 3-rb, 2-rb, 1-rb actions
     });
 
+    it(".msgHandler", function() {
+        let mock = {
+            process: {
+                msg: jasmine.createSpy()
+            }
+        };
+
+        mock.msg = common.msgHandler;
+
+        mock.msg("TYPE", { mockData: true });
+
+        expect(mock.process.msg).toHaveBeenCalledWith("TYPE", { mockData: true });
+    });
+
     describe(".determineValue", function(){
         it("returns first defined value", function() {
             let obj = {};

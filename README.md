@@ -4,6 +4,7 @@ Node PostgreSQL patching utility.
 
 [![Code Climate](https://codeclimate.com/github/Tireo/pg-patch/badges/gpa.svg)](https://codeclimate.com/github/Tireo/pg-patch)
 [![Issue Count](https://codeclimate.com/github/Tireo/pg-patch/badges/issue_count.svg)](https://codeclimate.com/github/Tireo/pg-patch)
+[![Dependencies Status](https://david-dm.org/Tireo/pg-patch/status.svg)](https://david-dm.org/Tireo/pg-patch)
 
 ## NOTICE
 

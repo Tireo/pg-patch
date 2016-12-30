@@ -150,6 +150,69 @@ VALUES
         })
     });
 
+    it(".connect", function(done){
+        let client = new pg.Client();
+
+        tmp = new pgPatchDbManager({
+            client: client
+        });
+
+        spyOn(tmp, 'createClient').and.returnValue(client);
+        spyOn(client, 'connect').and.callFake(cb => {
+            cb(null); //success mock
+        });
+
+        tmp.connect().then(() => {
+            expect(tmp.createClient).toHaveBeenCalled();
+        }).then(() => {
+            client.connect.and.callFake(cb => {
+                cb("error"); //success mock
+            });
+
+            tmp.connect().catch((err) => {
+                expect(err).toEqual("error");
+                done();
+            });
+        });
+    });
+
+    it(".checkPatchDataTable", function(){
+        tmp = new pgPatchDbManager();
+
+        spyOn(tmp, 'tableExists').and.returnValue("mockReturn");
+
+        expect(tmp.checkPatchDataTable()).toEqual("mockReturn");
+        expect(tmp.tableExists).toHaveBeenCalledWith(tmp.dbTable, tmp.dbSchema);
+    });
+
+    it(".getCurrentPatchVersion", function(){
+        tmp = new pgPatchDbManager();
+
+        spyOn(tmp, 'query').and.returnValue(q("mockReturn"));
+
+        tmp.getCurrentPatchVersion().then(result => {
+            expect().toEqual("mockReturn");
+            expect(tmp.query).toHaveBeenCalledWith(`select target_version from ${ymp.getDBPatchTableName()} order by patch_time DESC limit 1`);
+        });
+    });
+
+    it(".updatePatchHistory", function(){
+        tmp = new pgPatchDbManager();
+
+        spyOn(tmp, 'patchQuery').and.returnValue(q("mockReturn"));
+
+        let source = 1;
+        let target = 3;
+
+        tmp.updatePatchHistory(source, target).then(result => {
+            expect(result).toEqual("mockReturn");
+            expect(tmp.patchQuery).toHaveBeenCalledWith(`insert into ${tmp.getDBPatchTableName()}
+(source_version, target_version)
+values
+($1, $2)`, [source, target]);
+        });
+    });
+
     describe(".query", function(){
         beforeEach(function(){
             tmp = new pgPatchDbManager({client: new pg.Client()});
@@ -184,6 +247,33 @@ VALUES
                 }).finally(() => {
                     done();
                 });
+            });
+        });
+    });
+
+    describe(".patchQuery", function(){
+        it("no dryRun", function() {
+            tmp = new pgPatchDbManager();
+
+            spyOn(tmp, 'query');
+
+            tmp.patchQuery("abc", [1, 2, 3]);
+
+            expect(tmp.query).toHaveBeenCalledWith("abc", [1, 2, 3]);
+        });
+
+        it("dryRun.LOG_ONLY", function() {
+            tmp = new pgPatchDbManager({
+                dryRun: common.dryRun.LOG_ONLY
+            });
+
+            spyOn(tmp, 'msg');
+
+            tmp.patchQuery("abc", [1, 2, 3]);
+
+            expect(tmp.msg).toHaveBeenCalledWith("DRY_RUN:LOG_ONLY:QUERY", {
+                query: "abc",
+                values: [1, 2, 3]
             });
         });
     });
