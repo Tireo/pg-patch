@@ -17,6 +17,6 @@ let patcher = pgPatcher.create({
     //sourceVersion: 2,
     targetVersion: 0,
     //dryRun: 'LOG_ONLY',
-    transactionMode: 'SINGLE',
+    //transactionMode: 'SINGLE',
     client: "postgres://test:test@localhost:5432/test"
 }).run();
