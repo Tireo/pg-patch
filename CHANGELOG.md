@@ -1,3 +1,9 @@
+0.8.7 / 2016-12-31
+==================
+* fixed problem with patch file name parsing when given values are not found
+* fixed CRITICAL issue with improper current_version updates for transactionMode `SINGLE`
+* maintenance (code coverage, refactoring etc.)
+
 0.8.6 / 2016-12-30
 ==================
 * fixed possible wrong execution order of multiple patch files for one patch step

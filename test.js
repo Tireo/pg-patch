@@ -14,9 +14,9 @@ let pgPatcher = require("./lib/pg-patch.js");
 let patcher = pgPatcher.create({
     //patchFileTemplate: '^$SOURCE-$TARGET\\.sql$',
     logLevel: 'DEBUG',
-    sourceVersion: 2,
+    //sourceVersion: 2,
     targetVersion: 0,
     //dryRun: 'LOG_ONLY',
-    //transactionMode: 'SINGLE',
+    transactionMode: 'SINGLE',
     client: "postgres://test:test@localhost:5432/test"
 }).run();
