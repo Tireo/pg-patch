@@ -1,3 +1,7 @@
+0.8.8 / 2016-12-31
+==================
+* connected Travis CI
+
 0.8.7 / 2016-12-31
 ==================
 * fixed problem with patch file name parsing when given values are not found
