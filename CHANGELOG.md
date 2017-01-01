@@ -1,3 +1,8 @@
+1.0.0 / 2017-01-01
+==================
+* First stable release
+* Happy New Year everybody!
+
 0.8.8 / 2016-12-31
 ==================
 * connected Travis CI

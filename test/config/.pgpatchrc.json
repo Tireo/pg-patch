@@ -1,0 +1,5 @@
+{
+    "client": "postgres://test:test@localhost:5432/test",
+    "sourceVersion": 0,
+    "targetVersion": 2
+}

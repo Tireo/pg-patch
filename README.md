@@ -7,14 +7,6 @@ Node PostgreSQL patching utility.
 [![Issue Count](https://codeclimate.com/github/Tireo/pg-patch/badges/issue_count.svg)](https://codeclimate.com/github/Tireo/pg-patch)
 [![Dependencies Status](https://david-dm.org/Tireo/pg-patch/status.svg)](https://david-dm.org/Tireo/pg-patch)
 
-## NOTICE
-
-While it is a fully working work in progress... it is still work in progress.
-
-I'd be more than happy to hear some feedback.
-
-**Bugs can be present.**
-
 ## Features
 
 * Automatic migration from current version (or clean state) to newest version
@@ -35,12 +27,7 @@ I'd be more than happy to hear some feedback.
 * Configurable log level
 * Promise interface
 * fully async internally (where possible)
-* lightweight: about 6 KB zipped
-
-### planned:
-
-* Report generation support
-* Better organized log messages 
+* lightweight: about 8 KB zipped
 
 ## Preparation
 

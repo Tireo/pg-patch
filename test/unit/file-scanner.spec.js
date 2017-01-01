@@ -130,7 +130,7 @@ describe("file-scanner", function() {
                 //return;
             });
         }).catch(err => {
-            console.info(err);
+            expect("").toEqual(err); //force a fail
             done();
         });
     });

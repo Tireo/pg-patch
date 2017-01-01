@@ -13,12 +13,12 @@ describe("consoleReporter", function() {
     });
 
     it("configuration", function () {
-        spyOn(pgPatchConsole.prototype, 'createHandlers').and.callThrough();
+        spyOn(pgPatchConsole.prototype, 'createConsoleInvokers').and.callThrough();
 
         let tmpConsole = new pgPatchConsole();
 
         //creates handlers during creation
-        expect(pgPatchConsole.prototype.createHandlers).toHaveBeenCalled();
+        expect(pgPatchConsole.prototype.createConsoleInvokers).toHaveBeenCalled();
 
         //default
         expect(tmpConsole.logLevel).toEqual(common.logLevel.INFO);
@@ -49,14 +49,14 @@ describe("consoleReporter", function() {
             expect(mockInstance[lvl.toLowerCase()]).not.toBeDefined();
         }
 
-        mockInstance.createHandlers();
+        mockInstance.createConsoleInvokers();
 
         for(let lvl in common.logLevel){
             expect(mockInstance[lvl.toLowerCase()]).toBeDefined();
         }
     });
 
-    describe("handlers", function () {
+    /*describe("handlers", function () {
         let tmpConsole;
 
         beforeEach(function(){
@@ -81,5 +81,5 @@ describe("consoleReporter", function() {
                 }
             }
         });
-    });
+    });*/
 });
