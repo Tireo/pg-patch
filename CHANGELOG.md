@@ -1,3 +1,7 @@
+1.1.0 / 2017-01-08
+==================
+* Added reporters support (reporters API is not set to stone at the moment)
+
 1.0.0 / 2017-01-01
 ==================
 * First stable release

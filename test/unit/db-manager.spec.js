@@ -185,18 +185,23 @@ VALUES
         expect(tmp.tableExists).toHaveBeenCalledWith(tmp.dbTable, tmp.dbSchema);
     });
 
-    it(".getCurrentPatchVersion", function(){
+    it(".getCurrentPatchVersion", function(done){
         tmp = new pgPatchDbManager();
 
-        spyOn(tmp, 'query').and.returnValue(q("mockReturn"));
+        spyOn(tmp, 'query').and.returnValue(q({
+            rows: [{
+                target_version: "mockReturn"
+            }]
+        }));
 
         tmp.getCurrentPatchVersion().then(result => {
-            expect().toEqual("mockReturn");
-            expect(tmp.query).toHaveBeenCalledWith(`select target_version from ${ymp.getDBPatchTableName()} order by patch_time DESC limit 1`);
+            expect(result).toEqual("mockReturn");
+            expect(tmp.query).toHaveBeenCalledWith(`select target_version from ${tmp.getDBPatchTableName()} order by patch_time DESC limit 1`);
+            done();
         });
     });
 
-    it(".updatePatchHistory", function(){
+    it(".updatePatchHistory", function(done){
         tmp = new pgPatchDbManager();
 
         spyOn(tmp, 'patchQuery').and.returnValue(q("mockReturn"));
@@ -209,7 +214,8 @@ VALUES
             expect(tmp.patchQuery).toHaveBeenCalledWith(`insert into ${tmp.getDBPatchTableName()}
 (source_version, target_version)
 values
-($1, $2)`, [source, target]);
+($1, $2)`, [source, target], true);
+            done();
         });
     });
 
