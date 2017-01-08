@@ -4,7 +4,7 @@ Node PostgreSQL patching utility.
 
 [![npm version](https://badge.fury.io/js/pg-patch.svg)](https://badge.fury.io/js/pg-patch)
 [![Build Status](https://travis-ci.org/Tireo/pg-patch.svg?branch=master)](https://travis-ci.org/Tireo/pg-patch)
-[![Coverage Status](https://coveralls.io/repos/github/Tireo/pg-patch/badge.svg?branch=master)](https://coveralls.io/github/Tireo/pg-patch?branch=master)
+[![Test Coverage](https://codeclimate.com/github/Tireo/pg-patch/badges/coverage.svg)](https://codeclimate.com/github/Tireo/pg-patch/coverage)
 [![Code Climate](https://codeclimate.com/github/Tireo/pg-patch/badges/gpa.svg)](https://codeclimate.com/github/Tireo/pg-patch)
 [![Issue Count](https://codeclimate.com/github/Tireo/pg-patch/badges/issue_count.svg)](https://codeclimate.com/github/Tireo/pg-patch)
 [![Dependencies Status](https://david-dm.org/Tireo/pg-patch/status.svg)](https://david-dm.org/Tireo/pg-patch)
