@@ -7,13 +7,16 @@ Node PostgreSQL patching utility.
 [![Test Coverage](https://codeclimate.com/github/Tireo/pg-patch/badges/coverage.svg)](https://codeclimate.com/github/Tireo/pg-patch/coverage)
 [![Code Climate](https://codeclimate.com/github/Tireo/pg-patch/badges/gpa.svg)](https://codeclimate.com/github/Tireo/pg-patch)
 [![Issue Count](https://codeclimate.com/github/Tireo/pg-patch/badges/issue_count.svg)](https://codeclimate.com/github/Tireo/pg-patch)
-[![Dependencies Status](https://david-dm.org/Tireo/pg-patch/status.svg)](https://david-dm.org/Tireo/pg-patch)
+[![Dependencies Status](https://david-dm.org/Tireo/pg-patch/status.svg)](https://david-dm.org/Tireo/pg-patch)   
+
+[![NPM](https://nodei.co/npm/pg-patch.png?downloadRank=true)](https://nodei.co/npm/pg-patch/)
 
 ## Features
 
 * Automatic migration from current version (or clean state) to newest version
 * [Configurable source and target version](#configuration-cheatsheet)
-* Step by step forward / backward migration
+* [Step by step forward / backward migration](#step-by-step-migration)
+* [Support for custom patch data sources](#custom-patch-data-sources) (e.g. not files)
 * [Transactional migration with transaction strategy setting](#transaction-control):
     * per migration step (rollback **<u>only</u>** failed step and end process)
     * per migration process (rollback **<u>whole</u>** migration process)
@@ -21,15 +24,13 @@ Node PostgreSQL patching utility.
     * log only (no DB manipulation with patch SQL)
     * single transaction with rollback at the end (or first error)
 * [Configurable patch file name template](#custom-patch-file-template)
-* [Command line support](#command-line-tool)
+* [Command line](#command-line-tool) and JS interface
 * Patch history
 * Recursive subfolder checking for patch files
 * [Support for splitting migration step SQL into few files](#multiple-patch-files-per-updaterollback-step)
     * patch files for the same migration step can be in different subdirectories
-* Configurable log level
+* [Configurable log level](#configurable-log)
 * [Promise interface](#working-with-async-api)
-* fully async internally (where possible)
-* lightweight: about 8 KB zipped
 
 ## Preparation
 
@@ -228,6 +229,31 @@ require("pg-patch").run({
     pgClientInstance.end();
 });
 ```
+
+### Step by step migration
+
+To perform migration one step at a time:
+
+```node
+let pgPatch = require("pg-patch");
+
+pgPatch.stepUp(/* configuration */); //migrate one version up
+
+pgPatch.stepDown(/* configuration */); //migrate one version down
+```
+
+Similarly for the command line tool supply `stepUp`/`stepDown` flag:
+
+```
+pg-patch --stepUp
+```
+
+```
+pg-patch --stepDown
+```
+
+Other configuration options can be passed as usual, but for obvious reasons `targetVersion` will be ignored.
+
     
 ### Some quick copy'n'run examples
 
@@ -286,6 +312,40 @@ For detailed description about passing command line arguments see **[yargs](http
 ## Advanced usage
 
 So you want more? Granted!
+
+### Custom patch data sources
+
+* added in: `1.2.0`
+* **Important:** Supplying custom patch data does not disable standard file-searching behaviour.   
+    All found patch data sources will be used when migrating. 
+
+If you don't keep your patch data as files or access to these files is not supported by `pg-patch` (for example FTP) you can supply such data by yourself:
+
+```node
+let pgPatch = require("pg-patch");
+
+pgPatch.run({
+    customPatchData: [
+        customPatchDataObj1,
+        customPatchDataObj2
+        /* ... */
+    ]
+})
+```
+
+where `customPatchDataObjectX` needs to conform to given format:
+
+```node
+//update 0 => 1
+{
+    description: 'customDescription',  //not required
+    action: 'UPDATE',                  //'UPDATE' or 'ROLLBACK'
+    version: '1',                      //version to update TO or rollback FROM
+    sql: 'select 1234;'                //any valid SQL (without transaction statements)
+}
+```
+
+Custom patch data objects can be supplied in any order.   
 
 ### Transaction control
 
@@ -438,7 +498,7 @@ What matters that You can easily change how it works.
   ```
 
 ### Reporters (beta)  
-* added in: `1.0.1`
+* added in: `1.1.0`
 * **IMPORTANT**: reporters API is not set to stone - be aware it can be changed in future **MINOR** versions. 
 
 **pg-patch** supports custom reporters. The easiest way to do this is to just supply notify method:
@@ -484,13 +544,16 @@ If you would like to check all currently possible messages please check `lib/rep
 ## Configuration cheatsheet
 
 + **client** — Type: `Object|String` Default: `null`   
-DB connection client / settings. See **[Connecting to the PostgreSQL](#connecting-to-the-postgresql)** section
+DB connection client / settings. See **[Connecting to the PostgreSQL](#connecting-to-the-postgresql)**.
+
++ **customPatchData** — Type: `Array` Default: `null`   
+Supplies `pg-patch` with custom patch data. See **[Custom patch data sources](#custom-patch-data-sources)**.
 
 + **dbTable** — Type: `String` Default: `public.pgpatch`   
 **pg-patch** maintenance table to be used. Can also define schema: **schema.table**. If no `schema` is passed `public` is assumed.
 
 + **dryRun** — Type: `String` Default: `null`   
-Run patch in dry run mode? See **[Dry runs](#dry-runs)** section.
+Run patch in dry run mode? See **[Dry runs](#dry-runs)**.
 
 + **enableColorfulLogs** — Type: `Boolean` Default: `true`   
 Should colors be used in log?
@@ -502,7 +565,7 @@ Configures how much log information will be shown.
 Directory where patch files can be found.
 
 + **patchFileTemplate** — Type: `String` Default: `^patch-$VERSION-$ACTION(?:-$DESCRIPTION)?\\.sql$`   
-Patch file name template. See **[Custom patch file template](#custom-patch-file-template)** section.
+Patch file name template. See **[Custom patch file template](#custom-patch-file-template)**.
 
 + **sourceVersion** — Type: `Integer` Default: `null`   
 Version from which patch DB. **When not passed current version is used**.
@@ -512,7 +575,7 @@ Version from which patch DB. **When not passed current version is used**.
 Version to which patch DB. **If not passed newest patch file version is used**.
 
 + **transactionMode** — Type: `String` Default: `PER_VERSION_STEP`   
-Transaction mode to be used when patching DB. See **[Transaction control](#transaction-conrtol)** section.
+Transaction mode to be used when patching DB. See **[Transaction control](#transaction-conrtol)**.
 
 ## Common pitfalls
 

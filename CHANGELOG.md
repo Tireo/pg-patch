@@ -1,3 +1,7 @@
+1.2.0 / 2017-01-15
+==================
+* Added support for custom patch data
+
 1.1.0 / 2017-01-08
 ==================
 * Added reporters support (reporters API is not set to stone at the moment)

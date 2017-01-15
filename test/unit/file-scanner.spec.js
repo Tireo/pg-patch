@@ -58,13 +58,13 @@ describe("file-scanner", function() {
 
     it(".validatePatchFileTemplate", (done) => {
         tmp = new pgPatchFileScanner({
-            patchFileTemplate: "^$SOURCE-$ACTION-$TARGET\\.sql$",
+            patchFileTemplate: "^$SOURCE-$ACTION-$TARGET\\.sql$"
         });
         tmp.validatePatchFileTemplate().catch(err => {
             expect(err).toBeDefined();
         }).then(() => {
             tmp = new pgPatchFileScanner({
-                patchFileTemplate: "^$ACTION-$DESCRIPTION\\.sql$",
+                patchFileTemplate: "^$ACTION-$DESCRIPTION\\.sql$"
             });
             return tmp.validatePatchFileTemplate().catch(err => {
                 expect(err).toBeDefined();
@@ -95,7 +95,7 @@ describe("file-scanner", function() {
             });
         }).then(() => {
             tmp = new pgPatchFileScanner({
-                patchFileTemplate: "^$DESCRIPTION-$SOURCE-$TARGET\\.sql$",
+                patchFileTemplate: "^$DESCRIPTION-$SOURCE-$TARGET\\.sql$"
             });
             return tmp.validatePatchFileTemplate().then((mode) => {
                 expect(mode).toEqual(common.patchFileTemplateMode.ST);
@@ -117,7 +117,7 @@ describe("file-scanner", function() {
             });
         }).then(() => {
             tmp = new pgPatchFileScanner({
-                patchFileTemplate: "^$DESCRIPTION-$SOURCE-$TARGET$", //intentional error
+                patchFileTemplate: "^$DESCRIPTION-$SOURCE-$TARGET$" //intentional error
             });
             return tmp.validatePatchFileTemplate().then((mode) => {
                 expect(mode).toEqual(common.patchFileTemplateMode.ST);

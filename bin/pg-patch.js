@@ -5,7 +5,13 @@ let argv = require('yargs').argv;
 
 let pgPatch = require('../lib/pg-patch');
 
-pgPatch.run(argv);
+if (argv.stepUp) {
+    pgPatch.stepUp(argv);
+} else if (argv.stepDown) {
+    pgPatch.stepDown(argv);
+} else {
+    pgPatch.run(argv);
+}
 
 
 

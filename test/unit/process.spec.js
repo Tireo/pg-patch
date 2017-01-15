@@ -3,6 +3,7 @@
 const common = require('../../lib/common');
 const pgPatchProcess = require("../../lib/process");
 const dbManager = require("../../lib/db-manager");
+let runtimeConfig = require('../config/.pgpatchrc');
 
 const pg = require('pg');
 const q = require('q');
@@ -24,16 +25,15 @@ describe("process", () => {
 
     it("creation", () => {
         expect(() => {
-            new pgPatchProcess();
+            let pgPatch = new pgPatchProcess(); //let statement only to "fix" codeeval issue
         }).not.toThrow();
     });
 
     it("dummy dryRun=LOG_ONLY", (done) => {
-        let config = require('../config/.pgpatchrc');
-        config.dryRun = 'LOG_ONLY';
-        config.logLevel = 'NONE';
+        runtimeConfig.dryRun = 'LOG_ONLY';
+        runtimeConfig.logLevel = 'NONE';
 
-        tmp = new pgPatchProcess(config);
+        tmp = new pgPatchProcess(runtimeConfig);
         tmp.run().catch((err) => {
             expect("").toEqual(err); //force fail
         }).finally(() => {
@@ -42,13 +42,12 @@ describe("process", () => {
     });
 
     it("dummy dryRun=LOG_ONLY + full log", (done) => {
-        let config = require('../config/.pgpatchrc');
-        config.dryRun = 'LOG_ONLY';
-        config.logLevel = 'DEBUG';
+        runtimeConfig.dryRun = 'LOG_ONLY';
+        runtimeConfig.logLevel = 'DEBUG';
 
         spyOn(console, 'log'); //intentionally silent console
 
-        tmp = new pgPatchProcess(config);
+        tmp = new pgPatchProcess(runtimeConfig);
         tmp.run().catch((err) => {
             expect("").toEqual(err); //force fail
         }).finally(() => {

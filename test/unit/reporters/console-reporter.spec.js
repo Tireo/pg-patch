@@ -45,15 +45,16 @@ describe("consoleReporter", function() {
 
         let mockInstance = new mock();
 
-        for(let lvl in common.logLevel){
+        let logLvlKeys = Object.keys(common.logLevel);
+        logLvlKeys.forEach(lvl => {
             expect(mockInstance[lvl.toLowerCase()]).not.toBeDefined();
-        }
+        });
 
         mockInstance.createConsoleInvokers();
 
-        for(let lvl in common.logLevel){
+        logLvlKeys.forEach(lvl => {
             expect(mockInstance[lvl.toLowerCase()]).toBeDefined();
-        }
+        });
     });
 
     /*describe("handlers", function () {
