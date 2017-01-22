@@ -1,3 +1,7 @@
+1.3.0 / 2017-01-22
+==================
+* Added support for .js patch files
+
 1.2.0 / 2017-01-15
 ==================
 * Added support for custom patch data

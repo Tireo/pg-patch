@@ -16,6 +16,7 @@ Node PostgreSQL patching utility.
 * Automatic migration from current version (or clean state) to newest version
 * [Configurable source and target version](#configuration-cheatsheet)
 * [Step by step forward / backward migration](#step-by-step-migration)
+* Support for sql and [js patch data files](#js-patch-data-files)
 * [Support for custom patch data sources](#custom-patch-data-sources) (e.g. not files)
 * [Transactional migration with transaction strategy setting](#transaction-control):
     * per migration step (rollback **<u>only</u>** failed step and end process)
@@ -46,7 +47,7 @@ npm i pg-patch --save-dev
 By default all patch files need to:
 
 * Be inside patch directory: `pg-patch` (or in any subdirectory)
-* Follow naming convention: `patch-$VERSION-$ACTION[-$DESCRIPTION].sql`, where:
+* Follow naming convention: `patch-$VERSION-$ACTION[-$DESCRIPTION].(sql|js)`, where:
        
     * `$VERSION` - positive non-zero integer (leading zeros accepted)
     * `$ACTION` - up/rb for update to version and rollback from version respectively
@@ -55,7 +56,7 @@ By default all patch files need to:
     Example of valid patch file names:
     
     * `patch_1_up-update-to-version-1.sql`
-    * `patch_1_rb-rollback-from-version-1.sql`
+    * `patch_1_rb-rollback-from-version-1.js`
     * `patch_2_up.sql`
  
 Above parameters [can be configured](#configuration-cheatsheet).
@@ -313,6 +314,42 @@ For detailed description about passing command line arguments see **[yargs](http
 
 So you want more? Granted!
 
+### JS patch data files
+
+* added in: `1.3.0`
+
+Sometimes having possibility to create more dynamic SQL patch data is beneficial and `pg-patch` allows it in form of js patch files.
+
+JS patch files have the same file name rules as SQL patch files... they just need to end with `.js`.
+
+They are normal node modules that need to export function which returns SQL string.
+
+```node
+
+let sql;
+
+/* create sql in any way you need to */
+
+module.exports = function(){
+    return sql; 
+};
+```
+
+For example when you have a lot of repeating data:
+
+```node
+
+let dictArray = [ /* a lot of strings */ ];
+
+module.exports = function(){
+    return dictArray.map(function(v){
+        //just an example
+        //normally you would want to escape values and make only one insert
+        return `insert into dictionary VALUES ('${v}');`;
+    }).join(""); 
+};
+```
+
 ### Custom patch data sources
 
 * added in: `1.2.0`
@@ -455,7 +492,7 @@ require("pg-patch").run({
 
 ### Custom patch file template
 
-By default all patch files need to match given regex template: `^patch-$VERSION-$ACTION(?:-$DESCRIPTION)?\\.sql$`   
+By default all patch files need to match given regex template: `^patch-$VERSION-$ACTION(?:-$DESCRIPTION)?\\.(?:sql|js)$`   
 Each `$VAR` has distinct logic usage but for the regex purposes are shortcuts for:
 
 + `$VERSION` — `\\d+`   
@@ -475,8 +512,8 @@ Those cannot be combined.
 Double backslashes in above replacements are required due to how `new Regex()` works.   
 Each of those `$VARS` are then inserted are regex groups (that is the reason why `$ACTION` can look like it looks).
 
-So in case of default template `^patch-$VERSION-$ACTION(?:-$DESCRIPTION)?\\.sql$` the final regex is this:   
-`^patch-(?:\d+)-(?:up|rb)(?:-(?:[0-9a-zA-Z-_]+))?\.sql$`
+So in case of default template `^patch-$VERSION-$ACTION(?:-$DESCRIPTION)?\\.(?:sql|js)$` the final regex is this:   
+`^patch-(?:\d+)-(?:up|rb)(?:-(?:[0-9a-zA-Z-_]+))?\.(?:sql|js)$`
 
 Don't worry if You don't fully understand above.   
 What matters that You can easily change how it works.
@@ -564,7 +601,7 @@ Configures how much log information will be shown.
 + **patchDir** — Type: `String` Default: `pg-patch`   
 Directory where patch files can be found.
 
-+ **patchFileTemplate** — Type: `String` Default: `^patch-$VERSION-$ACTION(?:-$DESCRIPTION)?\\.sql$`   
++ **patchFileTemplate** — Type: `String` Default: `^patch-$VERSION-$ACTION(?:-$DESCRIPTION)?\\.(?:sql|js)$`   
 Patch file name template. See **[Custom patch file template](#custom-patch-file-template)**.
 
 + **sourceVersion** — Type: `Integer` Default: `null`   

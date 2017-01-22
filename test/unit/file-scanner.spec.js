@@ -2,11 +2,11 @@
 
 const common = require('../../lib/common');
 const pgPatchFileScanner = require("../../lib/file-scanner");
-const patchData =  require('../../lib/patch-data');
-const fsp =  require('../../lib/fs-promise');
-const q =  require('q');
+const patchData = require('../../lib/patch-data');
+const fsp = require('../../lib/fs-promise');
+const q = require('q');
 
-describe("file-scanner", function() {
+describe("file-scanner", function () {
     let tmp;
 
     it("creation", () => {
@@ -21,7 +21,7 @@ describe("file-scanner", function() {
 
         expect(tmp.actionUpdate).toEqual('up');
         expect(tmp.actionRollback).toEqual('rb');
-        expect(tmp.patchFileTemplate).toEqual('^patch-$VERSION-$ACTION(?:-$DESCRIPTION)?\\.sql$');
+        expect(tmp.patchFileTemplate).toEqual('^patch-$VERSION-$ACTION(?:-$DESCRIPTION)?\\.(?:sql|js)$');
         expect(tmp.patchDir).toEqual('pg-patch');
 
         //custom configuration
@@ -136,13 +136,13 @@ describe("file-scanner", function() {
     });
 
     describe(".scanDirectoryForPatchFiles", () => {
-        it("uses proper root directory", function(){
+        it("uses proper root directory", function () {
             spyOn(fsp, 'readDir').and.returnValue(q([]));
 
             (new pgPatchFileScanner()).scanDirectoryForPatchFiles();
             expect(fsp.readDir.calls.mostRecent().args).toEqual(['pg-patch']);
 
-            (new pgPatchFileScanner({ patchDir: 'aaaa' })).scanDirectoryForPatchFiles();
+            (new pgPatchFileScanner({patchDir: 'aaaa'})).scanDirectoryForPatchFiles();
             expect(fsp.readDir.calls.mostRecent().args).toEqual(['aaaa']);
 
         });
