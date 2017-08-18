@@ -1,3 +1,7 @@
+1.3.1 / 2017-08-18
+==================
+* Updated dependencies
+
 1.3.0 / 2017-01-22
 ==================
 * Added support for .js patch files
