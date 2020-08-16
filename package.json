@@ -1,6 +1,6 @@
 {
   "name": "pg-patch",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "PostgreSQL patching made easy.",
   "main": "index.js",
   "scripts": {
