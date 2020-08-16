@@ -7,15 +7,18 @@ const jasmine = require('gulp-jasmine');
 const JasmineConsoleReporter = require('jasmine-console-reporter');
 const argv = require('yargs').argv;
 
-gulp.task('lint', () =>
+const { task } = gulp;
+
+const lint = () =>
     gulp.src(['lib/*.js'])
         .pipe(jshint())
-        .pipe(jshint.reporter('default'))
-);
+        .pipe(jshint.reporter('default'));
 
-gulp.task('test', () => {
+const test = () => {
 
     let files = argv.subset ? `test/unit/*${argv.subset}*.js` : `test/unit/*.js`;
+
+    console.info(files);
 
     return gulp.src([files])
         .pipe(jasmine({
@@ -27,8 +30,10 @@ gulp.task('test', () => {
                 activity: false
             })
         }));
-});
+};
 
-gulp.task('build', ['lint', 'test']);
+gulp.task('lint', lint);
+gulp.task('test', test);
 
-gulp.task('default', ['build']);
+gulp.task('build', gulp.series(lint, test));
+gulp.task('default', gulp.series(lint, test));
